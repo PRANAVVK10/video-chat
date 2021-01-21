@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        const ROOM_ID="<%= roomId %>"
+    </script>
+    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket=io();
+        const videotab=document.getElementById('video')
+
+        var peer = new Peer(undefined,{
+            host:'/',
+            port:'3001'
+        }) 
+        const myvideo=document.createElement('video')
+        myvideo.muted=true
+        navigator.mediaDevices.getUserMedia({
+            video:true,
+            audio:true
+        }).then(stream=>{
+            console.log(stream)
+            addVideo(myvideo,stream)
+
+            // socket.on('user-connected', userid=>{
+            // connectToNewUser(userid,stream)
+        })
+        // })
+
+        // const connectToNewUser=(userid,stream)=>{
+        //     const call=peer.call(userid,stream)
+        //     const video=document.createElement('video')
+        //     call.on('stream',userVideo=>{
+        //         addVideo(video,userVideo)
+        //     })
+        //     call.on('close',()=>{
+        //         video.remove()
+        //     })
+        // }
+        
+        peer.on('open',id=>{
+            socket.emit('join-room',ROOM_ID,id)
+        })
+
+
+        const addVideo=(video,stream)=>{
+            video.srcObject=stream
+            video.onloadedmetadata = function() {
+                video.play()
+        }
+            // video.addEventListener("loadedmetadata",()=>{
+            //     video.play()
+            // })
+            videotab.append(video)
+        }
+    </script>
+    <title>video-chat</title>
+    <style>
+        #video{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 300px);
+            grid-template-rows: 300px;
+            
+        }
+        video{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div id="video"></div>
+    
+</body>
+</html>
